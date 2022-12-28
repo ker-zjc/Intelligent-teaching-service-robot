@@ -1,0 +1,90 @@
+C51 COMPILER V8.02   串口                                                                  08/16/2012 11:00:04 PAGE 1   
+
+
+C51 COMPILER V8.02, COMPILATION OF MODULE 串口
+OBJECT MODULE PLACED IN 串口.OBJ
+COMPILER INVOKED BY: E:\elecfans.com_Keil uVision3\C51\BIN\C51.EXE 串口.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <STC12C5A60S2.h>
+   2          #define uint unsigned int
+   3          #define uchar unsigned char
+   4          #include <string.h>   
+   5          sbit p1=P1^0;
+   6          sbit p2=P1^1;
+   7          void UART_init (void)
+   8          { 
+   9   1      EA = 1; 
+  10   1      ES = 1; 
+  11   1      PCON |= 0x80;  //使能波特率倍速位
+  12   1      SCON = 0x50;  //8位数据,可变波特率 
+  13   1      AUXR |= 0x40;  //定时器1时钟为Fosc,即1T 
+  14   1      AUXR &= 0xfe;  //串口1选择定时器1为波特率发生器 
+  15   1      TMOD &= 0x0f;  //清除定时器1模式位
+  16   1      TMOD |= 0x20;  //设定定时器1为8位自动重装方式 
+  17   1      TL1 = 0xFA;  //设定定时初值 
+  18   1      TH1 = 0xFA;  //设定定时器重装值 
+  19   1      ET1 = 0;  //禁止定时器1中断 
+  20   1      TR1 = 1;  //启动定时器1
+  21   1      }
+  22          
+  23           void DELAY_MS (uint z)
+  24          { 
+  25   1              uint x,y;
+  26   1              for(x=z;x>0;x--)
+  27   1                      for(y=110;y>0;y--);
+  28   1      }
+  29          void UART_R (void) interrupt 4  using 1
+  30          {   
+  31   1           unsigned char UART_data;   
+  32   1           RI = 0;
+  33   1           UART_data = SBUF;  
+  34   1      }
+  35          
+  36          void UART_T (unsigned char UART_data)
+  37          {
+  38   1         SBUF = UART_data;
+  39   1         while(TI == 0);
+  40   1         TI = 0;   
+  41   1      }
+  42          
+  43          void UART_TC (unsigned char *str)
+  44          {
+  45   1        while(*str != '\0') 
+  46   1        {
+  47   2           UART_T(*str);
+  48   2           *str++;
+*** WARNING C275 IN LINE 48 OF 串口.C: expression with possibly no effect
+  49   2        } 
+  50   1        *str = 0; 
+  51   1      }
+  52          void main (void)
+  53          {
+  54   1        UART_init();
+C51 COMPILER V8.02   串口                                                                  08/16/2012 11:00:04 PAGE 2   
+
+  55   1        while(1)
+  56   1       {
+  57   2         if(p1==0)
+  58   2         {UART_TC("#16P1000#24P2000T2000\r\n");
+  59   3        DELAY_MS (1500);}
+  60   2         if(p2==0)
+  61   2         {UART_TC("#16P1800#24P1000T2000\r\n");
+  62   3        DELAY_MS (1500);}
+  63   2       }
+  64   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    133    ----
+   CONSTANT SIZE    =     48    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

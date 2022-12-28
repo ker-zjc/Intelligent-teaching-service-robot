@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"12c5a串口.obj" 
+TO "串口通信" 
+RAMSIZE(256) 
